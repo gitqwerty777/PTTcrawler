@@ -1,9 +1,12 @@
 # encoding: utf-8
 import sys
 import json
+from types import *
 import jieba
 import jieba.analyse
 import jieba.posseg
+
+# check why error ocuur when crawling
 
 class DataParser:
     def __init__(self, jsonData):
@@ -12,7 +15,8 @@ class DataParser:
             self.data.append(Data(datum))
 
     def printData(self):
-        print self.data
+        for datum in self.data:
+            print datum
 
 
 class Data:
@@ -27,7 +31,20 @@ class Data:
         for jsonReply in jsonDatum["g_推文".decode('utf-8')]:
             self.replies.append(Reply(jsonReply))
         self.ip = jsonDatum["e_ip".decode('utf-8')]
-        self.replyStat = jsonDatum["h_推文總數".decode('utf-8')]
+        self.replyStat = ReplyStat(jsonDatum["h_推文總數".decode('utf-8')])
+
+    def __repr__(self):
+        s = ""
+        for i, item in enumerate([self.id, self.author, self.title, self.date, self.article, self.replies, self.ip, self.replyStat]):
+            if type(item) == UnicodeType:
+                s += str(item.encode("utf-8"))+"\n"
+            elif type(item) == ListType:
+                for element in item:
+                    s += str(element) + "\n"
+            else:
+                s += str(item)+"\n"
+        return s
+                
 
 
 class Reply:
@@ -37,11 +54,14 @@ class Reply:
         self.time = jsonReply["留言時間".decode('utf-8')]
         self.messager = jsonReply["留言者".decode('utf-8')]
 
+    def __repr__(self):
+        return ("%s %s: %s %s" % (self.type, self.messager, self.content, self.time)).encode('utf-8')
+
 
 class Article:
     def __init__(self, jsonArticle):
+        self.content = jsonArticle
         '''
-
         seg_list = jieba.cut(jsonArticle, cut_all=False)
         print "/".join(seg_list)
 
@@ -64,15 +84,20 @@ class Article:
             if flag != 'x':
                 print('(%s,%s)' % (word, flag))
         '''
-        
-        # print jsonArticle
-        # segment
-        # parse words
+
+    def __repr__(self):
+        return self.content.encode("utf-8")
 
 
 class ReplyStat:
-    def __init__(self):
-        pass
+    def __init__(self, jsonReplyStat):
+        self.total = jsonReplyStat['all']
+        self.good = jsonReplyStat['g']
+        self.bad = jsonReplyStat['b']
+        self.neutual = jsonReplyStat['n']
+
+    def __repr__(self):
+        return "推文 %d 噓文 %d 箭頭 %d 總計 %d" % (self.good, self.bad, self.neutual, self.total)
     
 
 if __name__ == "__main__":
@@ -81,4 +106,6 @@ if __name__ == "__main__":
     with open(fileName) as data_file:
         data = json.load(data_file)
         dataParser = DataParser(data)
+
+    dataParser.printData()
 

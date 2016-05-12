@@ -76,7 +76,7 @@ def parseGos(link , g_id):
         target_content=u'※ 發信站: 批踢踢實業坊(ptt.cc),'
         content = content.split(target_content)
         content = content[0].split(date)
-        main_content = content[1].replace('\n', '  ').replace('\t', '  ')
+        main_content = content[1]
         #print 'content:',main_content
         
         # message
