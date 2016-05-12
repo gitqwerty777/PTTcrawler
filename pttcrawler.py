@@ -80,7 +80,7 @@ def parseGos(link , g_id):
         #print 'content:',main_content
         
         # message
-        num , g , b , n ,message = 0,0,0,0,{}
+        num , g , b , n ,message = 0,0,0,0,[]
         for tag in soup.select('div.push'):
                 num += 1
                 push_tag = tag.find("span", {'class': 'push-tag'}).text
@@ -94,15 +94,14 @@ def parseGos(link , g_id):
                 push_ipdatetime = remove(push_ipdatetime, '\n')
                 #print "push-ipdatetime:",push_ipdatetime 
                 
-                message[num]={"狀態":push_tag.encode('utf-8'),"留言者":push_userid.encode('utf-8'),
-                              "留言內容":push_content.encode('utf-8'),"留言時間":push_ipdatetime.encode('utf-8')}
+                message.append({"狀態":push_tag.encode('utf-8'),"留言者":push_userid.encode('utf-8'),
+                              "留言內容":push_content.encode('utf-8'),"留言時間":push_ipdatetime.encode('utf-8')})
                 if push_tag == u'推 ':
                         g += 1
                 elif push_tag == u'噓 ':
                         b += 1
                 else:
                         n += 1
-  
         messageNum = {"g":g,"b":b,"n":n,"all":num}
         # json-data  type(d) dict
           
