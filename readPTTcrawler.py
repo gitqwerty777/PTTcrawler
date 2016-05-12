@@ -8,6 +8,7 @@ import jieba.posseg
 
 # check why error ocuur when crawling
 
+
 class DataParser:
     def __init__(self, jsonData):
         self.data = []
@@ -61,19 +62,23 @@ class Reply:
 class Article:
     def __init__(self, jsonArticle):
         self.content = jsonArticle
+
+        
         '''
+        # tokenization
         seg_list = jieba.cut(jsonArticle, cut_all=False)
         print "/".join(seg_list)
-
         seg_list = jieba.cut_for_search(jsonArticle)
         print "-".join(seg_list)
-        
-        seg_list = jieba.analyse.extract_tags(jsonArticle, topK=20, withWeight=True)  # collect keywords based on TF-IDF
+
+        # collect keywords based on TF-IDF
+        seg_list = jieba.analyse.extract_tags(jsonArticle, topK=20, withWeight=True)
         for keyword in seg_list:
             print keyword[0], keyword[1]
         print "------------"
 
-        seg_list = jieba.analyse.textrank(jsonArticle, topK=20, withWeight=True)  # collect keywords based on TF-IDF
+        # collect keywords based on textrank
+        seg_list = jieba.analyse.textrank(jsonArticle, topK=20, withWeight=True)
         for keyword in seg_list:
             print keyword[0], keyword[1]
         print "------------"
