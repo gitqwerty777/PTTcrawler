@@ -6,16 +6,51 @@ import jieba
 import jieba.analyse
 import jieba.posseg
 
-# check why error ocuur when crawling
+# 38521 39182 4/18 5/..
+# can't crawl page without title
 
-
-class DataParser:
+class PTTDataParser:
     def __init__(self, jsonData):
         self.data = []
         for datum in jsonData:
             self.data.append(Data(datum))
 
+    def analyze(self):
+        # TODO: sort userlist and use binary search
+        self.userList = []
+        for datum in self.data:
+            for reply in datum.replies:
+                if reply.replier not in self.userList:
+                    self.userList.append(reply.replier)
+
+        userMatrix = [[] for i in range(len(self.userList))]
+        articleMatrix = [[] for i in range(self.data[-1].id+1)]
+        for datum in self.data:
+            for reply in datum.replies:
+                userIndex = self.userList.index(reply.replier)
+                articleMatrix[datum.id].append(userIndex)
+                userMatrix[userIndex].append(datum.id)
+
+        with open("userList.txt", "w") as data_file:
+            for user in self.userList:
+                data_file.write("%s\n" % user)
+
+        with open("userMatrix.txt", "w") as data_file:
+            for i, articleList in enumerate(userMatrix):
+                data_file.write("%d " % len(articleList))
+                for articleID in articleList:
+                    data_file.write("%d " % articleID)
+                data_file.write("\n")
+
+        with open("articleMatrix.txt", "w") as data_file:
+            for i, userList in enumerate(articleMatrix):
+                data_file.write("%d " % len(userList))
+                for userID in userList:
+                    data_file.write("%d " % userID)
+                data_file.write("\n")
+
     def printData(self):
+        print "printdata"
         for datum in self.data:
             print datum
 
@@ -53,10 +88,10 @@ class Reply:
         self.type = jsonReply["狀態".decode('utf-8')]
         self.content = jsonReply["留言內容".decode('utf-8')]
         self.time = jsonReply["留言時間".decode('utf-8')]
-        self.messager = jsonReply["留言者".decode('utf-8')]
+        self.replier = jsonReply["留言者".decode('utf-8')]
 
     def __repr__(self):
-        return ("%s %s: %s %s" % (self.type, self.messager, self.content, self.time)).encode('utf-8')
+        return ("%s %s: %s %s" % (self.type, self.replier, self.content, self.time)).encode('utf-8')
 
 
 class Article:
@@ -88,6 +123,13 @@ class Article:
         for word, flag in words:
             if flag != 'x':
                 print('(%s,%s)' % (word, flag))
+
+        # collect keywords based on textrank
+        seg_list = jieba.analyse.textrank(jsonArticle, topK=20, withWeight=True)
+        for keyword in seg_list:
+            print keyword[0], keyword[1]
+        print "------------"
+        
         '''
 
     def __repr__(self):
@@ -107,10 +149,11 @@ class ReplyStat:
 
 if __name__ == "__main__":
     fileName = sys.argv[1]
-    
+
     with open(fileName) as data_file:
         data = json.load(data_file)
-        dataParser = DataParser(data)
+        dataParser = PTTDataParser(data)
 
-    dataParser.printData()
+    dataParser.analyze()
+    # dataParser.printData()
 
