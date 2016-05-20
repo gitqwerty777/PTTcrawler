@@ -5,6 +5,7 @@ from types import *
 import jieba
 import jieba.analyse
 import jieba.posseg
+from collections import *
 
 # 38521 39182 4/18 5/..
 # can't crawl page without title
@@ -30,6 +31,23 @@ class PTTDataParser:
                 userIndex = self.userList.index(reply.replier)
                 articleMatrix[datum.id].append(userIndex)
                 userMatrix[userIndex].append(datum.id)
+
+        exclusiveList = ["", "，".decode('utf-8'), "\n", "\t", "。".decode('utf-8'), "、".decode('utf-8'), "｜".decode('utf-8')]  # a lot of words...
+        with open("multiMatrix.txt", "w") as data_file:
+            for datum in self.data:
+                seg_list = jieba.cut(datum.article.content, cut_all=False)
+                termCounter = Counter()
+                for segment in seg_list:
+                    if segment in termCounter:
+                        termCounter[segment] += 1
+                    else:
+                        termCounter[segment] = 1
+                data_file.write("%d " % len(termCounter.most_common()))
+                for term in exclusiveList:
+                    del termCounter[term]
+                for term, count in termCounter.most_common():
+                    data_file.write("%s:%d " % (term.encode('utf-8'), count))
+                data_file.write("\n")
 
         with open("userList.txt", "w") as data_file:
             for user in self.userList:
