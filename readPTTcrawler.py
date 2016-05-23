@@ -32,7 +32,7 @@ class PTTDataParser:
                 articleMatrix[datum.id].append(userIndex)
                 userMatrix[userIndex].append(datum.id)
 
-        exclusiveList = ["", "，".decode('utf-8'), "\n", "\t", "。".decode('utf-8'), "、".decode('utf-8'), "｜".decode('utf-8')]  # a lot of words...
+        exclusiveList = ["", "，".decode('utf-8'), "\n", "\t", "。".decode('utf-8'), "、".decode('utf-8'), "｜".decode('utf-8'), " ", "　".decode('utf-8'), ":", ".", "/", "(", ")", "\\", "~", "!", "@", "#", "$", "^", "：".decode("utf-8"), "【".decode("utf-8"), "（".decode("utf-8"), "！".decode('utf-8'), "》".decode('utf-8')]  # a lot of words...
         with open("multiMatrix.txt", "w") as data_file:
             for datum in self.data:
                 seg_list = jieba.cut(datum.article.content, cut_all=False)
